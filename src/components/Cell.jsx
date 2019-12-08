@@ -1,5 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
+import ItemUtility from "../utility/ItemUtility";
+import { FormattedMessage } from "react-intl";
 
 export default class Cell extends React.Component {
     constructor(props, context) {
@@ -16,7 +18,7 @@ export default class Cell extends React.Component {
 
     onClicked() {
         this.props.onCellClicked({
-            __itemType: "Cell",
+            __itemType: "cell",
             __parentType: this.props.parentType,
             __slotPosition: this.props.slotPosition,
             filters: [
@@ -28,10 +30,11 @@ export default class Cell extends React.Component {
     }
 
     render() {
+        const { variant } = this.props;
 
         return <div className={"cell " + this.getRarity()} onClick={() => this.onClicked()}>
             <img src={"/assets/icons/perks/" + this.props.type + ".png"} />
-            <span className="cell-title">{this.props.variant}</span>
+            {variant && <span className="cell-title"><FormattedMessage id={ItemUtility.getTr("cells", this.props.variant)} /></span>}
         </div>;
     }
 }
