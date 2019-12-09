@@ -1,7 +1,0 @@
-name: Shrike's Zeal
-icon: /assets/icons/lanterns/ShrikesZeal.png
-description: null
-cells: Utility
-lantern_ability:
-  instant: Move 40% faster for 6 seconds.
-  hold: Creates an aura that grants nearby slayers 15% increased move speed and attack speed for 15 seconds.

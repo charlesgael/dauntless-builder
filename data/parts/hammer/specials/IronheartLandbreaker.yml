@@ -1,4 +1,0 @@
-name: Ironheart Landbreaker
-icon: /assets/icons/parts/hammer/specials/IronheartLandbreaker.png
-part_effect:
-  - Hold to load ammo into the hammer. Release to create an aether vent that buffs players who step over it, granting them +40% damage reduction and up to 155 healing over 30 seconds when aethercharged.
