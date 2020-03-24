@@ -11,9 +11,9 @@ class DataUtility {
     }
 
     getKeyByValue(object, value) {
-        for(let prop in object) {
-            if(object.hasOwnProperty(prop)) {
-                if(object[prop] === value) {
+        for (let prop in object) {
+            if (object.hasOwnProperty(prop)) {
+                if (object[prop] === value) {
                     return prop;
                 }
             }
@@ -47,7 +47,10 @@ class DataUtility {
     }
 
     getPartId(weaponType, value) {
-        return this.getMapIdByValue(`parts:${Case.camel(weaponType).toLowerCase()}`, value);
+        return this.getMapIdByValue(
+            `parts:${Case.camel(weaponType).toLowerCase()}`,
+            value
+        );
     }
 
     getJSON(url) {
@@ -57,11 +60,11 @@ class DataUtility {
             request.open("GET", url, true);
 
             request.onload = () => {
-                if(request.status >= 200 && request.status < 400) {
+                if (request.status >= 200 && request.status < 400) {
                     try {
                         const json = JSON.parse(request.responseText);
                         resolve(json);
-                    } catch(ex) {
+                    } catch (ex) {
                         reject(ex);
                     }
                 }
@@ -75,8 +78,24 @@ class DataUtility {
         });
     }
 
+    camelize(data) {
+        if (typeof data === "object") {
+            return Object.keys(data).reduce(
+                (acc, key) =>
+                    Object.assign(acc, {
+                        [key
+                            .split(":")
+                            .map(Case.camel)
+                            .join(":")]: this.camelize(data[key])
+                    }),
+                {}
+            );
+        }
+        return Case.camel(data);
+    }
+
     loadData(urlPrefix = "") {
-        if(this.isCurrentDataStillValid()) {
+        if (this.isCurrentDataStillValid()) {
             this._data = this.retrieveData("__db_data");
             this._meta = this.retrieveData("__db_meta");
             this._map = this.retrieveData("__db_map");
@@ -88,34 +107,43 @@ class DataUtility {
             this.getJSON(urlPrefix + "/data.json"),
             this.getJSON(urlPrefix + "/meta.json"),
             this.getJSON(urlPrefix + "/map/names.json")
-        ]).then(([data, meta, map]) => {
-            this.persistData("__db_lastupdate", new Date().getTime());
-            this.persistData("__db_data", data);
-            this.persistData("__db_meta", meta);
-            this.persistData("__db_map", map);
-            this.persistData("__db_scriptversion", SCRIPT_VERSION);
+        ])
+            .then(([data, meta, map]) => {
+                const _map = this.camelize(map);
+                console.log(_map);
 
-            this._data = data;
-            this._meta = meta;
-            this._map = map;
+                this.persistData("__db_lastupdate", new Date().getTime());
+                this.persistData("__db_data", data);
+                this.persistData("__db_meta", meta);
+                this.persistData("__db_map", _map);
+                this.persistData("__db_scriptversion", SCRIPT_VERSION);
 
-            return true;
-        }).catch(reason => {
-            console.error(reason);
-            return false;
-        });
+                this._data = data;
+                this._meta = meta;
+                this._map = this.camelize(_map);
+
+                return true;
+            })
+            .catch(reason => {
+                console.error(reason);
+                return false;
+            });
     }
 
     isCurrentDataStillValid() {
         const lastUpdate = this.retrieveData("__db_lastupdate");
 
-        if(!lastUpdate || ("isDeveloperModeEnabled" in window && window.isDeveloperModeEnabled())) {
+        if (
+            !lastUpdate ||
+            ("isDeveloperModeEnabled" in window &&
+                window.isDeveloperModeEnabled())
+        ) {
             return false;
         }
 
         const scriptVersion = this.retrieveData("__db_scriptversion") || -1;
 
-        if(scriptVersion != SCRIPT_VERSION) {
+        if (scriptVersion != SCRIPT_VERSION) {
             return false;
         }
 
@@ -124,7 +152,7 @@ class DataUtility {
         const SECOND = 1000;
         const MINUTE = 60 * SECOND;
 
-        return now < (Number(lastUpdate) + 30 * MINUTE);
+        return now < Number(lastUpdate) + 30 * MINUTE;
     }
 
     persistData(key, data) {
